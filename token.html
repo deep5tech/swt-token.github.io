@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Miner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f5fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .page {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+            width: 100%;
+            max-width: 600px;
+        }
+        #homepage {
+            display: block;
+        }
+        .balance, .level {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .balance img {
+            width: 20px;
+            height: 20px;
+        }
+        #mineButton {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #mineButton:hover {
+            background-color: #0056b3;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+        .card button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .card button:hover {
+            background-color: #0056b3;
+        }
+        .wallet-balance {
+            font-size: 2em;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .coming-soon {
+            font-size: 1.5em;
+            color: #888;
+            margin-top: 20px;
+        }
+        .timeline {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .timeline-event {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .timeline-event .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        .timeline-event.completed .icon {
+            background-color: green;
+        }
+        .timeline-event.pending .icon {
+            background-color: orange;
+        }
+        .timeline-event .content {
+            flex-grow: 1;
+        }
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 0;
+            margin:23px;
+            border-radius:25px;
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #000;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 13px;
+        }
+        .navbar a img {
+            width: 20px;
+            height: 20px;
+        }
+        .dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .dialog h3 {
+            margin: 0;
+        }
+        .dialog p {
+            margin: 10px 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="homepage" class="page">
+        <div class="balance">Balance: <span id="balance">0</span> <img src="https://via.placeholder.com/20" alt="Coin"></div>
+        <div class="level">Level: <span id="level">1</span> <img src="https://via.placeholder.com/20" alt="Level" onclick="showLevelDialog()"></div>
+        <button id="mineButton" onclick="startMining()">Start Mining (3h)</button>
+    </div>
+
+    <div id="minepage" class="page">
+        <div class="card-container">
+            <div class="card" data-timestamp="">
+                <img src="https://via.placeholder.com/150" alt="Card Image">
+                <h3>Card 1</h3>
+                <p>Earned: <span>100</span> Tokens</p>
+                <button onclick="collectTokens(this)">Collect</button>
+            </div>
+            <div class="card" data-timestamp="">
+                <img src="https://via.placeholder.com/150" alt="Card Image">
+                <h3>Card 2</h3>
+                <p>Earned: <span>200</span> Tokens</p>
+                <button onclick="collectTokens(this)">Collect</button>
+            </div>
+            <div class="card" data-timestamp="">
+                <img src="https://via.placeholder.com/150" alt="Card Image">
+                <h3>Card 3</h3>
+                <p>Earned: <span>300</span> Tokens</p>
+                <button onclick="collectTokens(this)">Collect</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="walletpage" class="page">
+        <h2>Your Wallet</h2>
+        <div class="wallet-balance">Token Balance: <span id="walletBalance">0</span></div>
+        <div class="coming-soon">Coming Soon</div>
+    </div>
+
+    <div id="roadmappage" class="page">
+        <h2>Project Roadmap</h2>
+        <div class="timeline">
+            <div class="timeline-event completed">
+                <div class="icon">??</div>
+                <div class="content">
+                    <h3>Stage 1</h3>
+                    <p>Description of Stage 1</p>
+                </div>
+            </div>
+            <div class="timeline-event pending">
+                <div class="icon">?</div>
+                <div class="content">
+                    <h3>Stage 2</h3>
+                    <p>Description of Stage 2</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="levelDialog" class="dialog">
+        <h3>Levels</h3>
+        <p>Level 1: 10,000 Tokens</p>
+        <p>Level 2: 50,000 Tokens</p>
+        <p>Level 3: 100,000 Tokens</p>
+        <p>Level 4: 200,000 Tokens</p>
+        <p>Level 5: 500,000 Tokens</p>
+        <p>Level 6: 1,000,000 Tokens</p>
+        <p>Level 7: 2,000,000 Tokens</p>
+        <button onclick="hideLevelDialog()">Close</button>
+    </div>
+
+    <div class="navbar">
+        <a href="#" onclick="showPage('homepage')">
+            <img src="https://via.placeholder.com/20" alt="Home">
+            Home
+        </a>
+        <a href="#" onclick="showPage('minepage')">
+            <img src="https://via.placeholder.com/20" alt="Mine">
+            Mine
+        </a>
+        <a href="#" onclick="showPage('walletpage')">
+            <img src="https://via.placeholder.com/20" alt="Wallet">
+            Wallet
+        </a>
+        <a href="#" onclick="showPage('roadmappage')">
+            <img src="https://via.placeholder.com/20" alt="Roadmap">
+            Roadmap
+        </a>
+    </div>
+
+    <script>
+        let balance = 0;
+        let level = 1;
+        let miningActive = false;
+        let miningEndTime = 0;
+        let miningInterval;
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function startMining(remainingTime = 3 * 60 * 60) {
+            if (miningActive) return;
+
+            miningActive = true;
+            const mineButton = document.getElementById('mineButton');
+            const endTime = Date.now() + remainingTime * 1000;
+            miningEndTime = endTime;
+
+            mineButton.innerText = `Mining... 3:00:00`;
+            mineButton.disabled = true;
+
+            miningInterval = setInterval(() => {
+                const now = Date.now();
+                remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+
+                const hours = Math.floor(remainingTime / 3600);
+                const minutes = Math.floor((remainingTime % 3600) / 60);
+                const seconds = remainingTime % 60;
+                mineButton.innerText = `Mining... ${hours}:${minutes}:${seconds}`;
+
+                balance += 1;
+                updateBalance();
+
+                if (remainingTime <= 0) {
+                    clearInterval(miningInterval);
+                    miningActive = false;
+                    mineButton.innerText = 'Start Mining (3h)';
+                    mineButton.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function collectTokens(button) {
+            const card = button.parentElement;
+            const lastCollected = parseInt(card.getAttribute('data-timestamp')) || 0;
+            const now = Date.now();
+
+            if (now - lastCollected >= oneDay) {
+                const earnedTokens = parseInt(button.previousElementSibling.querySelector('span').innerText);
+                balance += earnedTokens;
+                updateBalance();
+                card.setAttribute('data-timestamp', now);
+                button.innerText = 'Collected';
+                setTimeout(() => {
+                    button.innerText = 'Collect';
+                    button.disabled = false;
+                }, oneDay);
+            } else {
+                button.innerText = 'Wait 24h';
+                button.disabled = true;
+            }
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('walletBalance').innerText = balance;
+            updateLevel();
+            saveData();
+        }
+
+        function updateLevel() {
+            const levels = [10000, 50000, 100000, 200000, 500000, 1000000, 2000000];
+            for (let i = 0; i < levels.length; i++) {
+                if (balance >= levels[i]) {
+                    level = i + 2; // because level starts at 1
+                } else {
+                    break;
+                }
+            }
+            document.getElementById('level').innerText = level;
+        }
+
+        function showLevelDialog() {
+            document.getElementById('levelDialog').style.display = 'block';
+        }
+
+        function hideLevelDialog() {
+            document.getElementById('levelDialog').style.display = 'none';
+        }
+
+        function saveData() {
+            document.cookie = `balance=${balance}; path=/;`;
+            document.cookie = `level=${level}; path=/;`;
+            document.cookie = `miningEndTime=${miningEndTime}; path=/;`;
+        }
+
+        function loadData() {
+            const cookies = document.cookie.split(';');
+            cookies.forEach(cookie => {
+                const [name, value] = cookie.split('=');
+                if (name.trim() === 'balance') {
+                    balance = parseInt(value);
+                }
+                if (name.trim() === 'level') {
+                    level = parseInt(value);
+                }
+                if (name.trim() === 'miningEndTime') {
+                    miningEndTime = parseInt(value);
+                }
+            });
+
+            const now = Date.now();
+            if (miningEndTime && now < miningEndTime) {
+                const remainingTime = Math.max(0, Math.floor((miningEndTime - now) / 1000));
+                startMining(remainingTime);
+            }
+
+            updateBalance();
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
